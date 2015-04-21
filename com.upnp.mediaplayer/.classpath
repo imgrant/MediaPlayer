@@ -15,5 +15,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/lastFM"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/fullscreen"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ohNet"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jna"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JUL-Log4j-bridge"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/log4j-systemd-journal-appender"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
