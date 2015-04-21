@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
+import org.apache.logging.julbridge.JULLog4jBridge;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -37,13 +38,14 @@ public class HttpServerGrizzly {
 		if (port == null || port.equalsIgnoreCase("")) {
 			port = "8088";
 		}
+		JULLog4jBridge.assimilate();
 		Grizzly.logger(this.getClass()).getParent().setLevel(Level.FINEST);
 		String uri = BASE_URI + port + "/myapp/";
-		log.info("HTTP Server URI: " + uri);
+		log.debug("HTTP server URI: " + uri);
 		// server = HttpServer.createSimpleServer("./", 8088);
 		server = startServer(uri);
-		log.info("BaseDir: " + HttpServer.class.getClassLoader().toString());
-		log.info("Jersey app started: " + uri);
+		log.trace("HTTP server class loader: " + HttpServer.class.getClassLoader().toString());
+		log.debug("Jersey app started");
 
 		StaticHttpHandler handler = new StaticHttpHandler("./web", "/static");
 		handler.setFileCacheEnabled(false);
@@ -77,7 +79,6 @@ public class HttpServerGrizzly {
 		// create a resource config that scans for JAX-RS resources and
 		// providers
 		// in org.rpi.web.rest package
-		log.info("Starting HTTP Server: " + uri);
 		final ResourceConfig rc = new ResourceConfig().packages("org.rpi.web.rest");
 		return GrizzlyHttpServerFactory.createHttpServer(URI.create(uri), rc, false);
 	}

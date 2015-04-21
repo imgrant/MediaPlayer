@@ -25,7 +25,7 @@ public class PrvAVTransport extends DvProviderUpnpOrgAVTransport1 implements Obs
 
 	public PrvAVTransport(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating AvTransport");
+		log.debug("Creating custom DLNA AVTransport service");
 		enablePropertyLastChange();
 		// setPropertyLastChange(intitialEvent());
 		createEvent();

@@ -41,40 +41,44 @@ public class StartMe {
 			}
 		}
 
-		log.info("Starting......");
+		log.info("MediaPlayer version " + Config.getInstance().getVersion() + " started");
+		// Attempt to load a custom product configuration here
+		Config.getInstance().getCustomProductConfig();
+		log.info("Room name: " + Config.getInstance().getProductRoom());
+		log.info("Product name: " + Config.getInstance().getProductName());
+		log.debug("UDN: " + Config.getInstance().getUdn());
 
-		if (log.isInfoEnabled()) {
-			// to improve startup performance, if loglevel info is not enabled,
+		if (log.isDebugEnabled()) {
+			Config.getInstance().printLoggingConfig();
+			// to improve startup performance, if loglevel debug is not enabled,
 			// this is not needed, right?
-			log.info("Getting Network Interfaces");
+			log.debug("Available network interfaces:");
 			try {
 				Enumeration e = NetworkInterface.getNetworkInterfaces();
 				while (e.hasMoreElements()) {
 					NetworkInterface n = (NetworkInterface) e.nextElement();
 					Enumeration ee = n.getInetAddresses();
-					log.info("Network Interface Display Name: '" + n.getDisplayName() + "'");
-					log.info("NIC Name: '" + n.getName() + "'");
+					log.debug("  " + n.getDisplayName() + " (" + n.getName() + ")");
 					while (ee.hasMoreElements()) {
 						InetAddress i = (InetAddress) ee.nextElement();
-						log.info("IPAddress for Network Interface: " + n.getDisplayName() + " : " + i.getHostAddress());
+						log.debug("    IP address: " + i.getHostAddress());
 					}
 				}
 			} catch (Exception e) {
-				log.error("Error Getting IPAddress", e);
+				log.error("Unable to get network interfaces");
 			}
-			log.info("End Of Network Interfaces");
 		}
 
 		// Do we need to attempt to set the AudioCard
 		if (Config.getInstance().isMediaplayerEnableReceiver() || Config.getInstance().isAirPlayEnabled()) {
-			log.info("Available Audio Devices:");
+			log.debug("Available audio devices:");
 			try {
 				Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
 				List<String> endsWith = Config.getInstance().getJavaSoundcardSuffix();
 				boolean bFoundSoundCard = false;
 				for (int cnt = 0; cnt < mixerInfo.length; cnt++) {
 					String mixer = mixerInfo[cnt].getName().trim();
-					log.info("'" + mixer + "'");
+					log.debug("  " + mixer);
 					if (!bFoundSoundCard) {
 						for (String endWith : endsWith) {
 							if (mixer.trim().toUpperCase().endsWith(endWith.trim().toUpperCase())) {
@@ -84,20 +88,21 @@ public class StartMe {
 						}
 					}
 				}
+				setAudioDevice();
 			} catch (Exception e) {
-				log.error("Error getting Audio Devices");
+				log.error("Unable to get audio devices");
 			}
-			log.info("End Of Audio Devices");
 		}
-		setAudioDevice();
-		log.info("JVM Version: " + System.getProperty("java.version"));
+		
+		log.trace("Java VM version: " + System.getProperty("java.version"));
+		if (log.isTraceEnabled()) {
 		printSystemProperties();
+		}
+		
 		SimpleDevice sd = new SimpleDevice();
 
-		// loadPlugins();
 		sd.attachShutDownHook();
 		if (bInput) {
-
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			String line = "";
 
@@ -124,47 +129,23 @@ public class StartMe {
 	}
 
 	/***
-	 * List all the files in this directory and sub directories.
-	 * 
-	 * @param directoryName
-	 * @return
-	 */
-	// public static List<File> listFiles(String directoryName) {
-	// File directory = new File(directoryName);
-	// List<File> resultList = new ArrayList<File>();
-	// File[] fList = directory.listFiles();
-	// resultList.addAll(Arrays.asList(fList));
-	// for (File file : fList) {
-	// if (file.isFile()) {
-	// } else if (file.isDirectory()) {
-	// resultList.addAll(listFiles(file.getAbsolutePath()));
-	// }
-	// }
-	// return resultList;
-	// }
-
-	/***
 	 * Print out the System Properties.
 	 */
 	private static void printSystemProperties() {
-		log.fatal("#####Start of System Properties#########");
+		log.trace("System properties:");
 		Properties pr = System.getProperties();
 		TreeSet propKeys = new TreeSet(pr.keySet());
 		for (Iterator it = propKeys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
-			log.fatal("" + key + "=" + pr.get(key));
+			log.trace("  " + key + "=" + pr.get(key).toString().replace("\r", "\\r").replace("\n", "\\n").replace("\t","\\t"));
 		}
-		log.fatal("#####End of System Properties#########");
-		log.fatal("");
 		Map<String, String> variables = System.getenv();
-		log.fatal("#####Start of System Variables#########");
+		log.trace("System variables:");
 		for (Map.Entry<String, String> entry : variables.entrySet()) {
 			String name = entry.getKey();
 			String value = entry.getValue();
-			log.fatal(name + "=" + value);
+			log.trace("  " + name + "=" + value);
 		}
-		log.fatal("#####End of System Variables#########");
-		log.fatal("");
 	}
 
 	/**
@@ -175,7 +156,7 @@ public class StartMe {
 		String name = Config.getInstance().getJavaSoundcardName();
 		if (!Utils.isEmpty(name)) {
 			props.setProperty("javax.sound.sampled.SourceDataLine", name);
-			log.fatal("###Setting Sound Card Name: " + name);
+			log.info("Audio device: " + name);
 		}
 	}
 

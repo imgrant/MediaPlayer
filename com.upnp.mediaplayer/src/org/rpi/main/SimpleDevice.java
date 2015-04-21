@@ -83,7 +83,6 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 	 */
 	public SimpleDevice() {
 		PluginGateWay.getInstance().setSimpleDevice(this);
-		log.debug("Creating Simple Device version: " + Config.getInstance().getVersion());
 		// System.loadLibrary("ohNetJni");
 		// Call the OSManager to set our path to the libohNet libraries
 		OSManager.getInstance();
@@ -100,24 +99,26 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 		lib.setDebugLevel(getDebugLevel(Config.getInstance().getOpenhomeLogLevel()));
 
 		DeviceStack ds = lib.startDv();
-		String friendly_name = Config.getInstance().getMediaplayerFriendlyName().replace(":", " ");
-		String iDeviceName = "device-" + friendly_name + "-" + NetworkUtils.getHostName() + "-MediaRenderer";
-		iDevice = new DvDeviceFactory(ds).createDeviceStandard(iDeviceName, this);
-		log.debug("Created StandardDevice: " + iDevice.getUdn());
-		iDevice.setAttribute("Upnp.IconList", this.constructIconList(iDeviceName));
+
+		iDevice = new DvDeviceFactory(ds).createDeviceStandard(Config.getInstance().getUdn(), this);
+		log.debug("Created OpenHome device with UDN: " + iDevice.getUdn());
+		iDevice.setAttribute("Upnp.IconList", this.constructIconList(Config.getInstance().getUdn()));
+
+		String friendly_name = Config.getInstance().getProductRoom() + ":" + Config.getInstance().getProductName();
 
 		// iDevice.setAttribute("Upnp.Domain", "openhome-org");
 		iDevice.setAttribute("Upnp.Domain", "upnp.org");
 		iDevice.setAttribute("Upnp.Type", "MediaRenderer");
 		iDevice.setAttribute("Upnp.Version", "1");
-		iDevice.setAttribute("Upnp.FriendlyName", Config.getInstance().getMediaplayerFriendlyName());
-		iDevice.setAttribute("Upnp.Manufacturer", "Made in Manchester");
-		iDevice.setAttribute("Upnp.ModelName", "Open Home Java Renderer: v" + Config.getInstance().getVersion());
-		iDevice.setAttribute("Upnp.ModelDescription", "'We Made History Not Money' - Tony Wilson..");
+		iDevice.setAttribute("Upnp.FriendlyName", friendly_name);
+		iDevice.setAttribute("Upnp.Manufacturer", Config.getInstance().getManufacturerName());
+		iDevice.setAttribute("Upnp.ManufacturerUrl", Config.getInstance().getManufacturerUrl());
+		iDevice.setAttribute("Upnp.ModelName", Config.getInstance().getProductName());
+		iDevice.setAttribute("Upnp.ModelNumber", Config.getInstance().getVersion());
+		iDevice.setAttribute("Upnp.ModelDescription", Config.getInstance().getProductInfo());
+		iDevice.setAttribute("Upnp.ModelUrl", Config.getInstance().getProductUrl());
+		iDevice.setAttribute("Upnp.SerialNumber", Config.getInstance().getSerialNumber());
 		iDevice.setAttribute("Upnp.PresentationUrl", "http://" + NetworkUtils.getIPAddress() + ":" + Config.getInstance().getWebServerPort());
-		// iDevice.setAttribute("Upnp.IconList" , sb.toString());
-		// iDevice.setAttribute("Upnp.ModelUri", "www.google.co.uk");
-		// iDevice.setAttribute("Upnp.ModelImageUri","http://upload.wikimedia.org/wikipedia/en/thumb/0/04/Joy_Division.JPG/220px-Joy_Division.JPG");
 		iConnectionManager = new PrvConnectionManager(iDevice);
 		iProduct = new PrvProduct(iDevice);
 		iVolume = new PrvVolume(iDevice);
@@ -125,7 +126,7 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 		iInfo = new PrvInfo(iDevice);
 		iTime = new PrvTime(iDevice);
 		iRadio = new PrvRadio(iDevice);
-		// iInput = new PrvRadio(iDevice);
+
 		if (Config.getInstance().isMediaplayerEnableReceiver()) {
 			iReceiver = new PrvReceiver(iDevice);
 		}
@@ -160,42 +161,42 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 			PluginGateWay.getInstance().setStandbyPin(sr.getStandbyPin());
 			for (String key : sources.keySet()) {
 				Source s = sources.get(key);
-				log.debug("Adding Source: " + s.toString());
-				iProduct.addSource(Config.getInstance().getMediaplayerFriendlyName(), s.getName(), s.getType(), s.isVisible());
+				log.debug("Adding source: " + s.toString());
+				iProduct.addSource(Config.getInstance().getProductRoom(), s.getName(), s.getType(), s.isVisible());
 			}
 			iProduct.updateCurrentSource();
 
 		} catch (Exception e) {
-			log.error("Error Reading Input Sources");
+			log.error("Unable to load input sources");
 		}
 
 		iDevice.setEnabled();
-		log.debug("Device Enabled UDN: " + iDevice.getUdn());
-		iProduct.setSourceByname("PlayList");
+		iProduct.setSourceByName("PlayList");
 
 		if (Config.getInstance().isWebWerverEnabled()) {
+			log.info("Starting web server on port " + Config.getInstance().getWebServerPort());
 			httpServer = new HttpServerGrizzly(Config.getInstance().getWebServerPort());
 		} else {
-			log.fatal("HTTP Daemon is set to false, not starting");
+			log.warn("Web server option is set to false, not starting");
 		}
 
 		if (Config.getInstance().getMediaplayerStartupVolume() >= 0) {
-			log.debug("Setting Startup Volume: " + Config.getInstance().getMediaplayerStartupVolume());
+			log.info("Setting initial volume to " + Config.getInstance().getMediaplayerStartupVolume());
 			PlayManager.getInstance().setVolume(Config.getInstance().getMediaplayerStartupVolume());
 		} else {
+			log.info("Setting initial volume to 100");
 			PlayManager.getInstance().setVolume(100);
 		}
 		
 		try {
-			//Force a updateRadioList to enable Kazoo to find Radio Stations..
+			//Force an updateRadioList to enable Kazoo to find Radio Stations..
 			updateRadioList();
 		} catch (Exception e) {
-			log.error("Problem with getting Radio List");
+			log.error("Unable to update radio list");
 		}
 
 		if (Config.getInstance().isAirPlayEnabled()) {
-			log.info("Start AirPlay Receiver");
-			airplay = new AirPlayThread(Config.getInstance().getMediaplayerFriendlyName());
+			airplay = new AirPlayThread(friendly_name);
 			airplay.start();
 		}
 
@@ -237,7 +238,8 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 		sb.append(size);
 		sb.append("</height>");
 		sb.append("<depth>24</depth>");
-		sb.append("<url>/" + deviceName + "/Upnp/resource/org/rpi/image/mediaplayer");
+		sb.append("<url>/" + deviceName + "/Upnp/resource/org/rpi/image/");
+		sb.append(Config.getInstance().getPackagedImageFilename());
 		sb.append(size);
 		sb.append(fileSuffix);
 		sb.append("</url>");
@@ -298,11 +300,11 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				log.debug("Shutdown Hook, Start of Shutdown");
+				log.info("MediaPlayer shutdown initiated");
 				dispose();
 			}
 		});
-		log.debug("Shut Down Hook Attached.");
+		log.trace("Shutdown hook attached");
 	}
 
 	public void dispose() {
@@ -312,7 +314,7 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 				airplay.stopThread();
 			}
 		} catch (Exception e) {
-			log.error("Error Shutting Down AirPlay Server", e);
+			log.error("Error shutting down AirPlay service");
 		}
 
 		try {
@@ -320,7 +322,7 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 				httpServer.shutdown();
 			}
 		} catch (Exception e) {
-			log.error("Error Stopping HTTP Server:", e);
+			log.error("Error stopping web server");
 		}
 
 		try {
@@ -340,13 +342,11 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 		}
 
 		if (iDevice != null) {
-			log.info("Destroying device");
-
 			try {
 				iDevice.destroy();
-				log.info("Destroyed device");
+				log.trace("Device destroyed");
 			} catch (Exception e) {
-				log.error("Error Destroying Device", e);
+				log.error("Error destroying device", e);
 			}
 		}
 
@@ -365,11 +365,10 @@ public class SimpleDevice implements IResourceManager, IDvDeviceListener, IMessa
 
 		if (lib != null) {
 			try {
-				log.info("Attempting to Close DeviceStack");
 				lib.close();
-				log.info("Closed DeviceStack");
+				log.trace("Device stack closed");
 			} catch (Exception e) {
-				log.error("Error Closing DeviceStack", e);
+				log.error("Error closing device stack", e);
 			}
 		}
 

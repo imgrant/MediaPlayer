@@ -41,7 +41,7 @@ public class PrvRadio extends DvProviderAvOpenhomeOrgRadio1 implements Observer,
 
 	public PrvRadio(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating CustomRadio");
+		log.debug("Creating custom OpenHome Radio service");
 
 		enablePropertyChannelsMax();
 		enablePropertyId();
@@ -85,14 +85,13 @@ public class PrvRadio extends DvProviderAvOpenhomeOrgRadio1 implements Observer,
 	 * @param channels
 	 */
 	public void addChannels(List<ChannelRadio> channels) {
-		log.debug("Start of AddRadioChannels");	
 		propertiesLock();
 		this.channels = channels;
 		array = UpdateIdArray();
 		setPropertyIdArray(array);
 		setPropertyChannelsMax(channels.size());
 		propertiesUnlock();
-		log.debug("Added Radio Channels: " + channels.size());
+		log.debug("Added " + channels.size() + " radio channels");
 		last_updated = System.currentTimeMillis();
 	}
 
@@ -273,7 +272,7 @@ public class PrvRadio extends DvProviderAvOpenhomeOrgRadio1 implements Observer,
 	 * long string 4 bytes (8bits) And add to a byte array
 	 */
 	private byte[] UpdateIdArray() {
-		log.debug("Start of UpdateIdArray Radio");
+		log.trace("Updating radio ID array");
 		int size = channels.size() * 4;
 		StringBuilder sb = new StringBuilder();
 		byte[] bytes = new byte[size];
@@ -299,8 +298,6 @@ public class PrvRadio extends DvProviderAvOpenhomeOrgRadio1 implements Observer,
 			// byte b = Byte.parseByte(sByte, 2);
 			bytes[i] = sens;
 		}
-		
-		log.debug("End of UpdateIdArray Radio");
 		return bytes;
 	}
 

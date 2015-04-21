@@ -37,12 +37,11 @@ public class OSManager {
 	}
 
 	protected OSManager() {
-		log.debug("Initializing OSManager");
 		setJavaPath();
-		if (isRaspi()) {
-			log.debug("This is a Raspi so Attempt to initialize Pi4J");
+		//if (isRaspi()) {
+			//log.debug("This is a Raspi so Attempt to initialize Pi4J");
 			// initPi4J();
-		}
+		//}
 	}
 
 	// private void initPi4J()
@@ -68,7 +67,6 @@ public class OSManager {
 	 * @throws IllegalAccessException
 	 */
 	public void addLibraryPath(String pathToAdd) throws Exception {
-		log.debug("Adding Path: " + pathToAdd);
 		Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
 		usrPathsField.setAccessible(true);
 
@@ -89,49 +87,44 @@ public class OSManager {
 	private void setJavaPath() {
 		try {
 			String class_name = this.getClass().getName();
-			log.debug("Find Class, ClassName: " + class_name);
+			log.trace("Find Class, ClassName: " + class_name);
 			String path = getFilePath(this.getClass(), true);
 			if (path.endsWith("/")) {
 				path = path.substring(0, (path.length() - 1));
-				log.debug("Path ended with '/'. Updated Path to be: " + path);
+				log.trace("Path ended with '/'. Updated Path to be: " + path);
 			} else {
-				log.debug("Path did not end with '/': " + path);
+				log.trace("Path did not end with '/': " + path);
 			}
 			String full_path = path + OHNET_LIB_DIR + "/default";
-			log.debug("Path of this File is: " + path);
+			log.trace("Path of this File is: " + path);
 			String os = System.getProperty("os.name").toUpperCase();
-			log.debug("OS Name: " + os);
+			log.debug("System OS: " + System.getProperty("os.name"));
+			log.debug("OS version: " + System.getProperty("os.version"));
+			log.debug("CPU architecture: " + System.getProperty("os.arch"));
 			if (os.startsWith("WINDOWS")) {
-				log.debug("Windows OS");
 				String osPathName = "windows";
 				String osArch = System.getProperty("os.arch");
-
 				String architecture = "x86";
 				if (osArch.endsWith("64")) {
 					architecture = "x64";
 				}
-
 				full_path = path + OHNET_LIB_DIR + "/" + osPathName + "/" + architecture;
 			} else if (os.startsWith("LINUX")) {
 				String osPathName = "linux";
-
 				String arch = System.getProperty("os.arch").toUpperCase();
 				if (arch.startsWith("ARM")) {
 					String osArch = "arm";
-
-					log.debug("Its an ARM device, now check, which revision");
 					try {
 						String armVersion = getReadElfTag("Tag_CPU_arch");
-
 						if (armVersion == null) {
-							log.error("Cannot determine ARM version...");
+							log.warn("Unable to determine ARM version");
 							osArch = "UNKNOWN";
 						} else if (armVersion.equals("v5")) {
 							osArch = osArch + "v5sf";
 						} else if (armVersion.equals("v6")) {
 							// we believe that a v6 arm is always a raspi (could
 							// be a pogoplug...)
-							log.debug("We think this is a Raspi");
+							log.trace("System is probably a Raspberry Pi");
 							setRaspi(true);
 							if (isHardFloat()) {
 								osArch = osArch + "v6hf";
@@ -141,7 +134,7 @@ public class OSManager {
 						} else if (armVersion.equals("v7")) {
 							osArch = osArch + "v7";
 						} else {
-							log.error("Unknown ARM version...(" + armVersion + ")");
+							log.warn("Unknown ARM architecture version (" + armVersion + ")");
 							osArch = "UNKNOWN";
 						}
 
@@ -149,24 +142,22 @@ public class OSManager {
 							full_path = path + OHNET_LIB_DIR + "/" + osPathName + "/" + osArch;
 						}
 					} catch (Exception e) {
-						log.debug("Error Determining ARM OS Type: ", e);
+						log.error("Unable to determine ARM architecture version");
 					}
 				} else if (arch.startsWith("I386")) {
 					String version = System.getProperty("os.version");
-					log.debug("OS is Linux, and arch is  " + arch + ". Version is: " + version);
 					full_path = path + OHNET_LIB_DIR + "/" + osPathName + "/x86";
 				} else if (arch.startsWith("AMD64")) {
 					String version = System.getProperty("os.version");
-					log.debug("OS is Linux, and arch is " + arch + ". Version is: " + version);
 					full_path = path + OHNET_LIB_DIR + "/" + osPathName + "/amd64";
 				}
 			}
 
-			log.warn("Using full_path " + full_path);
+			log.debug("Auto-selected path to ohNet libraries: " + full_path);
 			addLibraryPath(full_path);
 
 		} catch (Exception e) {
-			log.error(e);
+			log.error("Unable to locate ohNet libraries");
 		}
 
 	}
@@ -199,32 +190,32 @@ public class OSManager {
 		}
 		className = className.replace('.', '/');
 		className = className + ".class";
-		log.debug("Find Class, Full ClassName: " + className);
+		log.trace("Find Class, Full ClassName: " + className);
 		String[] splits = className.split("/");
 		String properName = splits[splits.length - 1];
-		log.debug("Find Class, Proper ClassName: " + properName);
+		log.trace("Find Class, Proper ClassName: " + properName);
 		URL classUrl = mClass.getResource(className);
 		if (classUrl != null) {
 			String temp = classUrl.getFile();
-			log.debug("Find Class, ClassURL: " + temp);
+			log.trace("Find Class, ClassURL: " + temp);
 			if (temp.startsWith("file:")) {
 				temp = temp.substring(5);
 			}
 
 			if (temp.toUpperCase().contains(".JAR!")) {
-				log.debug("Find Class, This is a JarFile: " + temp);
+				log.trace("Find Class, This is a JarFile: " + temp);
 				String[] parts = temp.split("/");
 				String jar_path = "";
 				for (String part : parts) {
 					if (!part.toUpperCase().endsWith(".JAR!")) {
 						jar_path += part + "/";
 					} else {
-						log.debug("Find File: Returning JarPath: " + jar_path);
+						log.trace("Find File: Returning JarPath: " + jar_path);
 						return jar_path;
 					}
 				}
 			} else {
-				log.debug("Find Class, This is NOT a Jar File: " + temp);
+				log.trace("Find Class, This is NOT a Jar File: " + temp);
 				if (temp.endsWith(className)) {
 					if (bUseFullNamePath) {
 						temp = temp.substring(0, (temp.length() - className.length()));
@@ -233,10 +224,10 @@ public class OSManager {
 					}
 				}
 			}
-			log.debug("Find File: Returning FilePath: " + temp);
+			log.trace("Find File: Returning FilePath: " + temp);
 			return temp;
 		} else {
-			log.debug("Find Class, URL Not Found");
+			log.trace("Find Class, URL Not Found");
 			return "\nClass '" + className + "' not found in \n'" + System.getProperty("java.class.path") + "'";
 		}
 	}
@@ -246,7 +237,6 @@ public class OSManager {
 	 */
 	public void loadPlugins() {
 		try {
-			log.info("Start of LoadPlugins");
 			pm = PluginManagerFactory.createPluginManager();
 			List<File> files = listFiles("plugins");
 			if (files == null)
@@ -254,16 +244,15 @@ public class OSManager {
 			for (File file : files) {
 				try {
 					if (file.getName().toUpperCase().endsWith(".JAR")) {
-						log.debug("Attempt to Load Plugin: " + file.getName() + " " + file.toURI());
+						log.debug("Loading plugin: " + file.getName() + " " + file.toURI());
 						pm.addPluginsFrom(file.toURI());
 					}
 				} catch (Exception e) {
-					log.error("Unable to load Plugins", e);
+					log.warn("Unable to load plugin: " + file.getName());
 				}
 			}
-			log.info("End of LoadPlugnis");
 		} catch (Exception e) {
-			log.error("Error Loading Plugins");
+			log.warn("Error loading plugins");
 		}
 	}
 
@@ -276,7 +265,7 @@ public class OSManager {
 		try {
 			return pm.getPlugin(AlarmClockInterface.class);
 		} catch (Exception e) {
-			log.error("Could not get AlarmClock Plugin");
+			log.warn("Unable to find AlarmClock plugin");
 		}
 		return null;
 	}
@@ -296,6 +285,7 @@ public class OSManager {
 		resultList.addAll(Arrays.asList(fList));
 		for (File file : fList) {
 			if (file.isFile()) {
+				// do nothing? shouldn't this add the file to the results list? or are they already added...?
 			} else if (file.isDirectory()) {
 				resultList.addAll(listFiles(file.getAbsolutePath()));
 			}
@@ -334,13 +324,13 @@ public class OSManager {
 				pm.shutdown();
 			}
 		} catch (Exception e) {
-			log.error("Error closing PluginManager", e);
+			log.error("Error closing PluginManager");
 		}
 		try {
 			if (bUsedPi4J)
 				Pi4JManager.getInstance().dispose();
 		} catch (Exception e) {
-			log.error("Error closing pi4j", e);
+			log.error("Error closing Pi4J");
 		}
 	}
 
@@ -369,10 +359,10 @@ public class OSManager {
 				gnueabihf.add("gnueabihf");
 				gnueabihf.add("armhf");
 				if (Utils.containsString(System.getProperty("sun.boot.library.path"), gnueabihf) || Utils.containsString(System.getProperty("java.library.path"), gnueabihf) || Utils.containsString(System.getProperty("java.home"), gnueabihf) || getBashVersionInfo().contains("gnueabihf") || hasReadElfTag("Tag_ABI_HardFP_use")) {
-					log.debug("This is a HardFloat");
-					return true; //
+					log.trace("System has a hardware floating point unit");
+					return true;
 				}
-				log.debug("This is a HardFloat");
+				log.trace("System does not have a hardware floating point unit");
 				return false;
 			}
 		});
@@ -399,7 +389,7 @@ public class OSManager {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Error Executing bash --version", e);
+			log.warn("Unable to determine bash version");
 		}
 		// catch (IOException ioe) { ioe.printStackTrace(); }
 		// catch (InterruptedException ie) { ie.printStackTrace(); }
@@ -439,15 +429,8 @@ public class OSManager {
 				}
 			}
 		} catch (Exception e) {
-			log.error("IOException during readelf operation", e);
+			log.warn("Error during readelf operation");
 		}
-		// catch (IOException ioe) {
-		// log.error("IOException during readelf operation", ioe);
-		// }
-		// catch (InterruptedException ie) {
-		// log.error("InterruptedEx during readelf operation", ie);
-
-		// }
 		return tagValue;
 	}
 

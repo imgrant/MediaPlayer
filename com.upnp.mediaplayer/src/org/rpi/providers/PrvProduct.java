@@ -19,26 +19,28 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Observer, IDisposableDevice {
 
 	private Logger log = Logger.getLogger(PrvProduct.class);
-	private String friendly_name = Config.getInstance().getMediaplayerFriendlyName();
+	private String friendly_name = Config.getInstance().getProductRoom();
 	// private String iSourceXml =
 	// "<SourceList><Source><Name>Playlist</Name><Type>Playlist</Type><Visible>1</Visible></Source><Source><Name>Receiver</Name><Type>Receiver</Type><Visible>1</Visible></Source><Source><Name>Radio</Name><Type>Radio</Type><Visible>1</Visible></Source></SourceList>";
 	private String iSourceXml = "";
 	// private boolean standby = true;
 	private String attributes = "Info Time Volume Receiver Sender Credentials";
 	// private String attributes = "";
-	private String man_name = "Java Inc";
-	private String man_info = "Developed in Java using OpenHome";
-	private String man_url = "";
-	private String man_image = "";
-	private String model_name = "Test Model Name";
-	private String model_info = "Test Model Info";
-	private String model_url = "";
-	private String model_image = "";
-	private String prod_room = friendly_name;
-	private String prod_name = "Java MediaPlayer";
-	private String prod_info = "Developed by Pete";
-	private String prod_url = "";
-	private String prod_image = "";
+	private String man_name = Config.getInstance().getManufacturerName();
+	private String man_info = Config.getInstance().getManufacturerInfo();
+	private String man_url = Config.getInstance().getManufacturerUrl();
+	private String man_image = Config.getInstance().getManufacturerImageUri();
+	private String model_name = Config.getInstance().getModelName();
+	private String model_info = Config.getInstance().getModelInfo();
+	private String model_url = Config.getInstance().getModelUrl();
+	// "http://" + Config.ip + ":" + Config.port + "/" + Config.getInstance().getUdn() + Config.getInstance().getResourceURIPrefix()+"org/rpi/image/mediaplayer240.png";
+//	private String model_image = Config.getInstance().getResourceURIPrefix()+"org/rpi/image/mediaplayer240.png";
+	private String model_image = Config.getInstance().getModelImageUri();
+	private String prod_room = Config.getInstance().getProductRoom();
+	private String prod_name = Config.getInstance().getProductName();
+	private String prod_info = Config.getInstance().getProductInfo();
+	private String prod_url = Config.getInstance().getProductUrl();
+	private String prod_image = Config.getInstance().getProductImageUri();
 
 	private PlayManager iPlayer = null;
 
@@ -46,8 +48,9 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 
 	public PrvProduct(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating CustomProduct");
+		log.debug("Creating custom OpenHome Product service");
 		iPlayer = PlayManager.getInstance();
+		
 		enablePropertyStandby();
 		enablePropertyAttributes();
 		enablePropertyManufacturerName();
@@ -149,7 +152,8 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 		}
 		sb.append("</SourceList>");
 		iSourceXml = sb.toString();
-		log.debug("SourceXML \r\n " + iSourceXml);
+//		log.debug("SourceXML \r\n " + iSourceXml);
+		log.trace("Source XML updated");
 		propertiesLock();
 		setPropertySourceCount(sources.size());
 		setPropertySourceXml(iSourceXml.trim());
@@ -255,7 +259,7 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 	@Override
 	protected void setSourceIndexByName(IDvInvocation paramIDvInvocation, String paramString) {
 		log.debug("SetSourceIndexByName: " + paramString + Utils.getLogText(paramIDvInvocation));
-		setSourceByname(paramString);
+		setSourceByName(paramString);
 	}
 
 	public void updateStandby(boolean standby) {
@@ -265,7 +269,6 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 	}
 
 	/**
-	 * Attempt to try and set the PlayList as Default Source
 	 * 
 	 * @param paramLong
 	 */
@@ -273,11 +276,12 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 		setPropertySourceIndex(paramLong);
 	}
 
-	public synchronized void setSourceByname(String name) {
+	public synchronized void setSourceByName(String name) {
 		long count = 0;
 		for (Source source : sources) {
 			if (source.getName().equalsIgnoreCase(name)) {
 				setPropertySourceIndex(count);
+				log.debug("Set source by name: " + name);
 			}
 			count++;
 		}
@@ -293,7 +297,7 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 			break;
 		case EVENTSOURCECHANGED:
 			EventSourceChanged es = (EventSourceChanged) e;
-			setSourceByname(es.getName());
+			setSourceByName(es.getName());
 		} 
 
 	}
@@ -306,7 +310,6 @@ public class PrvProduct extends DvProviderAvOpenhomeOrgProduct1 implements Obser
 			long source_index = getPropertySourceIndex();
 			Source source = sources.get((int) source_index);
 			String name = source.getName();
-			log.debug("Source Selected: " + name);
 			PluginGateWay.getInstance().setSourceId(name,source.getType());
 		} catch (Exception e) {
 			log.error(e);

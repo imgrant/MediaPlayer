@@ -64,7 +64,7 @@ public class TCPConnector extends Observable implements Observer {
 		String line = in.readLine();
 		if (isOK(line)) {
 			version = removeText(line, MPD_OK);
-			log.info("MPD Version: " + version);
+			log.info("MPD version: " + version);
 		}
 		return line;
 	}

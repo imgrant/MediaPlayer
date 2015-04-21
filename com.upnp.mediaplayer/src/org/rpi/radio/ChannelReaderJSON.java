@@ -61,15 +61,14 @@ public class ChannelReaderJSON implements Runnable {
 			getJSONFromFile();
 			String partnerId = Config.getInstance().getRadioTuneInPartnerId();
 			if (Utils.isEmpty(partnerId)) {
-				log.debug("TuneIn PartnerId not configured, do not attempt to load TuneIn stations");
-
+				log.debug("TuneIn partner ID is not configured, will not attempt to load TuneIn presets");
 			} else {
 				String url = "http://opml.radiotime.com/Browse.ashx?c=presets&partnerid=" + partnerId + "&username=" + Config.getInstance().getRadioTuneinUsername() + "&render=json";
 				getJsonFromURL(url);
 			}
 			prvRadio.addChannels(channels);
 		} catch (Exception e) {
-			log.error("Error Getting Channels", e);
+			log.error("Unable to fetch radio channels");
 		}
 	}
 
@@ -81,11 +80,10 @@ public class ChannelReaderJSON implements Runnable {
 		try {
 			reader = new FileReader("RadioList.json");
 		} catch (FileNotFoundException e) {
-			log.error("Cannot find RadioList.json", e);
+			log.warn("Unable to load radio list JSON file");
 			// Bail out here is we can't find the file
 			return;
 		}
-
 		this.getJsonFromReader(reader);
 	}
 
@@ -314,7 +312,7 @@ public class ChannelReaderJSON implements Runnable {
 		}
 		log.info("Channel Name (For AlarmClock Config: '" + name+"'");
 		channels.add(channel);
-		log.debug("Added Channel: " + channel.getId() + " - " + channel.getUri() + " " + channel.getFullDetails());
+		log.debug("Added radio channel: [" + channel.getId() + "] " + channel.getName() + " (" + channel.getUri() + ")");
 
 	}
 

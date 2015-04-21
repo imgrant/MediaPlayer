@@ -97,8 +97,10 @@ public class MPDPlayer extends Observable implements IPlayer, Observer {
 		List<String> params = new ArrayList<String>();
 		if (bPause) {
 			params.add("1");
+			log.debug("Pausing MPD playback");
 		} else {
 			params.add("0");
+			log.debug("Unpausing MPD playback");
 		}
 		tcp.sendCommand(tcp.createCommand("pause", params));
 	}
@@ -111,6 +113,7 @@ public class MPDPlayer extends Observable implements IPlayer, Observer {
 	@Override
 	public void stop() {
 		bStopRequest = true;
+		log.debug("Stopping MPD playback");
 		tcp.sendCommand(tcp.createCommand("stop"));
 
 	}
@@ -139,6 +142,7 @@ public class MPDPlayer extends Observable implements IPlayer, Observer {
 	private void setVolumeInternal(long volume) {
 		List<String> params = new ArrayList<String>();
 		params.add("" + volume);
+		log.debug("Setting MPD volume: " + volume);
 		tcp.sendCommand(tcp.createCommand("setvol", params));
 	}
 

@@ -58,7 +58,7 @@ public class PlayListWriter extends Thread {
 							save = false;
 							log.debug("Saved PlayList");
 						} catch (Exception e) {
-							log.error("Error: SavePlayList", e);
+							log.error("Unable to write playlist XML");
 						}
 					}
 				}
@@ -66,7 +66,7 @@ public class PlayListWriter extends Thread {
 			}
 
 		} catch (Exception e) {
-			log.error("Error: SavePlayList", e);
+			log.error("Unable to write playlist XML");
 		}
 	}
 

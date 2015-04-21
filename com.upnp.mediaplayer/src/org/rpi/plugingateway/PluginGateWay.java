@@ -50,7 +50,7 @@ public class PluginGateWay extends Observable {
 	 * @param visible
 	 */
 	public synchronized void addSource(String type, String name, boolean visible) {
-		simpleDevice.getProduct().addSource(Config.getInstance().getMediaplayerFriendlyName(), name, type, true);
+		simpleDevice.getProduct().addSource(Config.getInstance().getProductRoom(), name, type, true);
 	}
 
 	/**

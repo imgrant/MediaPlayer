@@ -35,7 +35,7 @@ public class SecUtils {
 			byte[] encrypted = cipher.doFinal(value.getBytes());
 			return Base64.encode(encrypted);
 		} catch (Exception ex) {
-			LOGGER.error("Error encrypt: ", ex);
+			LOGGER.error("Error encrypting: ", ex);
 		}
 		return null;
 	}
@@ -49,7 +49,7 @@ public class SecUtils {
 
 			return new String(original);
 		} catch (Exception ex) {
-			LOGGER.error("Error decrypt: ", ex);
+			LOGGER.error("Error decrypting: ", ex);
 		}
 		return null;
 	}
@@ -62,29 +62,22 @@ public class SecUtils {
 	 * @return encrypted data
 	 */
 	public static byte[] encryptRSA(byte[] array) {
-		LOGGER.info("Start of EncryptRSA");
+		LOGGER.trace("Encrypting data with RSA...");
 		PEMParser pemReader = null;
 		try {
 			// Security.addProvider(new BouncyCastleProvider());
-			LOGGER.debug("Create pemReader");
 			pemReader = new PEMParser(new StringReader(key));
-			LOGGER.debug("Created pemReader");
-			LOGGER.debug("ReadObject");
-
 			PEMKeyPair pObj = (PEMKeyPair) pemReader.readObject();
 			//PemObject pObj = pemReader.readPemObject();
 			JcaPEMKeyConverter convert = new JcaPEMKeyConverter();
 			PrivateKey key = convert.getPrivateKey(pObj.getPrivateKeyInfo());
 
 			// Encrypt
-			LOGGER.debug("getInstancer");
 			Cipher cipher = Cipher.getInstance("RSA/NONE/PKCS1Padding");
-			LOGGER.debug("Cipher");
 			cipher.init(Cipher.ENCRYPT_MODE,key);
-			LOGGER.info("End of EncryptRSA");
+			LOGGER.trace("  ...RSA encryption finished");
 			return cipher.doFinal(array);
 			
-
 		} catch (Exception e) {
 			LOGGER.error(e);
 		}finally
@@ -109,7 +102,7 @@ public class SecUtils {
 	 * @return
 	 */
 	public static byte[] decryptRSA(byte[] array) {
-		LOGGER.debug("Start of decryptRSA");
+		LOGGER.trace("Decrypting data with RSA...");
 		PEMParser pemReader = null;
 		try {
 
@@ -122,7 +115,7 @@ public class SecUtils {
 			// Encrypt
 			Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPPadding");
 			cipher.init(Cipher.DECRYPT_MODE, key);
-			LOGGER.debug("End of decryptRSA");
+			LOGGER.trace("  ...RSA decryption finished");
 			return cipher.doFinal(array);
 
 		} catch (Exception e) {

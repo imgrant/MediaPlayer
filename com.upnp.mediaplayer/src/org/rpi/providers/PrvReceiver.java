@@ -30,7 +30,7 @@ public class PrvReceiver extends DvProviderAvOpenhomeOrgReceiver1 implements IDi
 
 	public PrvReceiver(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating PrvReceiver");
+		log.debug("Creating custom OpenHome Receiver service");
 		enablePropertyMetadata();
 		enablePropertyProtocolInfo();
 		enablePropertyTransportState();

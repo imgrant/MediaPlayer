@@ -19,7 +19,7 @@ public class PrvTime extends DvProviderAvOpenhomeOrgTime1 implements Observer, I
 
 	public PrvTime(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating CustomTime");
+		log.debug("Creating custom OpenHome Time service");
 		enablePropertyTrackCount();
 		enablePropertyDuration();
 		enablePropertySeconds();

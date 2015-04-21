@@ -81,47 +81,49 @@ public class CustomPatternLayout extends Layout {
 	{
 		StringBuffer sb = new StringBuffer();
 		String nl = System.getProperty("line.separator");
-		Date date = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		int dstOffset = cal.getTimeZone().getDSTSavings();
-		if(dstOffset>0)
-		{
-			dstOffset = dstOffset/3600000;
-		}
-		sb.append(header);
-		sb.append("LocalTime :\t\t\t" +cal.getTime());
-		sb.append(nl);
-		sb.append("DST  :\t\t\t\tOffset = " + dstOffset);
-		sb.append(nl);
-		sb.append("Timezone :\t\t\t" + cal.getTimeZone().getID() + ", " +cal.getTimeZone().getDisplayName() + ", " + cal.getTimeZone().getDisplayName(true, 1));
-		sb.append(nl);
-		sb.append(nl);
+//		Date date = new Date();
+//		Calendar cal = Calendar.getInstance();
+//		cal.setTime(date);
+//		int dstOffset = cal.getTimeZone().getDSTSavings();
+//		if(dstOffset>0)
+//		{
+//			dstOffset = dstOffset/3600000;
+//		}
+//		sb.append(header);
+//		sb.append("Local time:    " +cal.getTime());
+//		sb.append(nl);
+//		sb.append("DST:           Offset = " + dstOffset);
+//		sb.append(nl);
+//		sb.append("Timezone:      " + cal.getTimeZone().getID() + ", " +cal.getTimeZone().getDisplayName() + ", " + cal.getTimeZone().getDisplayName(true, 1));
+//		sb.append(nl);
+//		sb.append(nl);
 		sb.append(nl);
 		return sb.toString();
 	}
 	
 	private void setHeader()
 	{
-		StringBuffer sb = new StringBuffer();
-		Date date = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		int dstOffset = cal.getTimeZone().getDSTSavings();
-		if(dstOffset>0)
-		{
-			dstOffset = dstOffset/3600000;
-		}
-		String nl = System.getProperty("line.separator");
-		sb.append("Friendly Name :\t\t" + Config.getInstance().getMediaplayerFriendlyName());
-		sb.append(nl);
-		sb.append("Version :\t\t\t" + Config.getInstance().getVersion());
-		sb.append(nl);
-		sb.append("Host name  : \t\t\t" + getHostName().trim());
-		sb.append(nl);		
-		sb.append("StartTime :\t\t\t" + Config.getInstance().getStartTime());
-		sb.append(nl);
-		header = sb.toString();
+//		StringBuffer sb = new StringBuffer();
+//		Date date = new Date();
+//		Calendar cal = Calendar.getInstance();
+//		cal.setTime(date);
+//		int dstOffset = cal.getTimeZone().getDSTSavings();
+//		if(dstOffset>0)
+//		{
+//			dstOffset = dstOffset/3600000;
+//		}
+//		String nl = System.getProperty("line.separator");
+//		sb.append("Room name:     " + Config.getInstance().getProductRoom());
+//		sb.append(nl);
+//		sb.append("Product name:  " + Config.getInstance().getProductName());
+//		sb.append(nl);
+//		sb.append("Version:       " + Config.getInstance().getVersion());
+//		sb.append(nl);
+//		sb.append("Host name:     " + getHostName().trim());
+//		sb.append(nl);		
+//		sb.append("Start time:    " + Config.getInstance().getStartTime());
+//		sb.append(nl);
+//		header = sb.toString();
 	}
 	
 	private String getHostName() {

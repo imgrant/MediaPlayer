@@ -35,7 +35,7 @@ public class PrvPlayList extends DvProviderAvOpenhomeOrgPlaylist1 implements Obs
 
 	public PrvPlayList(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating CustomPlayList");
+		log.debug("Creating custom OpenHome Playlist service");
 
 		plw = new PlayListWriter();
 		plw.start();

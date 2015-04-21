@@ -135,9 +135,8 @@ public class AudioEventQueue implements Runnable, Observer {
 
 	public synchronized void clear() {
 		try {
-			log.info("Clearing Work Queue. Number of Items: " + mWorkQueue.size());
+			log.debug("Clearing work queue (number of items: " + mWorkQueue.size() + ")");
 			mWorkQueue.clear();
-			log.info("WorkQueue Cleared");
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);
 		}

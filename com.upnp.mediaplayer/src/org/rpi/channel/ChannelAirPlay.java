@@ -113,7 +113,7 @@ public class ChannelAirPlay extends ChannelBase {
 			res = (result.getWriter().toString());
 			metadata = res;
 		} catch (Exception e) {
-			log.error("Error Creating XML Doc", e);
+			log.warn("Error updating track details");
 		}
 		return res;
 	}

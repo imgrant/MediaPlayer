@@ -87,7 +87,7 @@ public class ChannelReader {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Error Getting Radio List", e);
+			log.warn("Unable to load radio list XML file");
 		}
 		getTuneInChannels();
 		return channels;

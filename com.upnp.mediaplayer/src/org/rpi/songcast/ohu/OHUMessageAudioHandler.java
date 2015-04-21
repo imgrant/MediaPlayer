@@ -6,14 +6,14 @@ package org.rpi.songcast.ohu;
  * Create an Player and passes the sound bytes
  */
 
+import java.util.Vector;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.rpi.config.Config;
 import org.rpi.java.sound.AudioInformation;
+import org.rpi.java.sound.IAudioPacket;
 import org.rpi.java.sound.IJavaSoundPlayer;
 import org.rpi.java.sound.JavaSoundPlayerBasic;
 import org.rpi.java.sound.JavaSoundPlayerLatency;
@@ -93,7 +93,7 @@ public class OHUMessageAudioHandler extends SimpleChannelInboundHandler<OHUMessa
 	}
 	
 	public boolean repair(OHUMessageAudio msg) {
-		log.fatal("Songcast: Repair recevied frame " + msg.getFrameNumber());
+		log.debug("Songcast: Repair recevied frame " + msg.getFrameNumber());
 		int diff = msg.getFrameNumber() - lastFrameNumber;
 		
 		if (diff == 1) {

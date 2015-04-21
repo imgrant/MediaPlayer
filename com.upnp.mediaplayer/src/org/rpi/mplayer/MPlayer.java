@@ -53,13 +53,13 @@ public class MPlayer extends Observable   implements IPlayer, Observer  {
 		this.volume = volume;
 		this.bMute = mute;
 		current_track = track;
-		log.info("Starting to playTrack Id: " + uniqueId + " " + track.getFullDetails());
+		log.info("Playing track: " + uniqueId + " (" + track.getTitle() + ")");
 		//String url = track.getUri();
 		String url = checkURL(track.getUri());
 		try {
 			initProcess(url);
 		} catch (Exception e) {
-			log.error("Error playTrack: ", e);
+			log.error("Error playing track: " + uniqueId + " (" + track.getTitle() + ")");
 		}
 		return true;
 	}

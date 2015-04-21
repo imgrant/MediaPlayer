@@ -25,7 +25,7 @@ public class PrvInfo extends DvProviderAvOpenhomeOrgInfo1 implements Observer, I
 
 	public PrvInfo(DvDevice iDevice) {
 		super(iDevice);
-		log.debug("Creating Info");
+		log.debug("Creating custom OpenHome Info service");
 
 		enablePropertyTrackCount();
 		enablePropertyDetailsCount();

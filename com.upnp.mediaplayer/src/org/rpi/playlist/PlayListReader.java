@@ -59,7 +59,7 @@ public class PlayListReader {
 			//log.warn("Time to Add CustomTracks: " + duration);
 			//log.debug("HoldHere");
 		} catch (Exception e) {
-			log.error("Error: Reading XML", e);
+			log.warn("Unable to load playlist XML file");
 		}
 		return "";
 	}

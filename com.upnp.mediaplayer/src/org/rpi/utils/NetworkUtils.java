@@ -24,45 +24,11 @@ public class NetworkUtils {
 
     }
 
-//    /***
-//     * Get the MAC Address.
-//     *
-//     * The previous implementation was kind of "oldschool", see http://www.mkyong.com/java/how-to-get-mac-address-in-java/
-//     * TODO Does not work on Raspi...
-//     *
-//     * @return
-//     */
-//    public static String getMacAddress() {
-//        InetAddress ip;
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        try {
-//            ip = InetAddress.getLocalHost();
-//            log.debug("InterAdress: " + ip.getHostAddress());
-//            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-//
-//            byte[] mac = network.getHardwareAddress();
-//
-//            for (int i = 0; i < mac.length; i++) {
-//                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-//            }
-//
-//        }
-//        catch (UnknownHostException uhex) {
-//            log.error(uhex);
-//        }
-//        catch (SocketException sex) {
-//            log.error(sex);
-//        }
-//
-//        return sb.toString();
-//    }
     
     /**
 	 * Returns a suitable hardware address.
 	 * The other method did not work on raspi wheezy
-	 * @return a MAC address
+	 * @return byte
 	 */
 	public static byte[] getMacAddress() {
 		try {
@@ -76,7 +42,7 @@ public class NetworkUtils {
 	    		try {
 		    		final byte[] ifaceMacAddress = iface.getHardwareAddress();
 		    		if ((ifaceMacAddress != null) && (ifaceMacAddress.length == 6) && !isBlockedHardwareAddress(ifaceMacAddress)) {
-		    			log.info("Hardware address is " + toHexString(ifaceMacAddress) + " (" + iface.getDisplayName() + ")");
+		    			log.debug("Hardware address is MAC: " + toHexString(ifaceMacAddress) + " (" + iface.getDisplayName() + ")");
 		    	    	return Arrays.copyOfRange(ifaceMacAddress, 0, 6);
 		    		}
 	    		}
@@ -92,7 +58,7 @@ public class NetworkUtils {
 		/* Fallback to the IP address padded to 6 bytes */
 		try {
 			final byte[] hostAddress = Arrays.copyOfRange(InetAddress.getLocalHost().getAddress(), 0, 6);
-			log.info("Hardware address is " + toHexString(hostAddress) + " (IP address)");
+			log.debug("Hardware address is IP: " + toHexString(hostAddress));
 			return hostAddress;
 		}
 		catch (final Throwable e) {
@@ -100,7 +66,7 @@ public class NetworkUtils {
 		}
 
 		/* Fallback to a constant */
-		log.info("Hardware address is 00DEADBEEF00 (last resort)");
+		log.debug("Hardware address is fake MAC (last resort): 00DEADBEEF00");
 		return new byte[] {(byte)0x00, (byte)0xDE, (byte)0xAD, (byte)0xBE, (byte)0xEF, (byte)0x00};
 	}
 	
@@ -156,7 +122,7 @@ public class NetworkUtils {
             // String canonicalHostName = iAddress.getCanonicalHostName();
             return hostName;
         } catch (Exception e) {
-            log.error("Error Getting HostName: ", e);
+            log.error("Error getting hostname");
         }
 
         return toHexString(getMacAddress());
@@ -170,7 +136,7 @@ public class NetworkUtils {
             // String canonicalHostName = iAddress.getCanonicalHostName();
             return addr;
         } catch (Exception e) {
-            log.error("Error Getting IPAddress: ", e);
+            log.error("Error getting IP address: ");
         }
     	return "127.0.0.1";
     }
@@ -192,7 +158,7 @@ public class NetworkUtils {
     	}
     	catch(Exception e)
     	{
-    		log.error("Error Getting NIC Name. DisplayName: " + displayName,e);
+    		log.warn("Error getting name for NIC: " + displayName);
     	}
     	return res;
     }

@@ -75,26 +75,24 @@ public class AirPlayThread extends Thread {
 	}
 
 	public void run() {
-		log.debug("Starting AirPlay Service...");
+		log.info("Starting AirPlay receiver");
 		ResourceLeakDetector.setLevel(Level.DISABLED);
 		// For the Raspi we have to do this now, because for some reason it is
 		// very slow the first time it is run and if we run it when we get an
 		// AirPlay connection the connection times out.
-		log.debug("Create BouncyCastleProvider");
+		log.debug("Creating BouncyCastleProvider...");
 		Security.addProvider(new BouncyCastleProvider());
-		log.debug("Created BouncyCastleProvider");
-		log.debug("Initiate an encrypt");
+		log.debug("  ...BouncyCastleProvider created");
 		byte[] test = new byte[] { (byte) 0xe0, 0x4f, (byte) 0xd0, 0x20, (byte) 0xea, 0x3a, 0x69, 0x10, (byte) 0xa2, (byte) 0xd8, 0x08, 0x00, 0x2b, 0x30, 0x30, (byte) 0x9d };
 		SecUtils.encryptRSA(test);
 
-		// int port = 5004;
 		int port = 5004;
 		try {
 			// DNS Emitter (Bonjour)
-			byte[] hwAddr = NetworkUtils.getMacAddress();
-			log.debug("Check if Passsword is set");
+			hwAddr = NetworkUtils.getMacAddress();
 			boolean bPassword = false;
 			if (!Utils.isEmpty(password)) {
+				log.debug("An AirPlay password is configured");
 				bPassword = true;
 			}
 			AudioSessionHolder.getInstance().setHardWareAddress(hwAddr);
@@ -110,7 +108,6 @@ public class AirPlayThread extends Thread {
 			b.childHandler(new RtspServerInitializer());
 			ChannelFuture channel = b.bind(new InetSocketAddress(port)).sync();
 
-			log.debug("Registering AirTunes Services");
 			for (final NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
 				if (iface.isLoopback())
 					continue;
@@ -127,13 +124,12 @@ public class AirPlayThread extends Thread {
 						/* Create mDNS responder for address */
 						BonjourEmitter be = new BonjourEmitter(name, NetworkUtils.toHexString(hwAddr), port, bPassword, addr);
 						emitter.add(be);
-						log.debug("Registered AirTunes service '" + name + "' on " + addr);
+						log.debug("Registered AirPlay service '" + name + "' on " + addr);
 					} catch (final Throwable e) {
-						log.error("Failed to publish service on " + addr.toString(), e);
+						log.error("Failed to publish AirPlay service on " + addr.toString(), e);
 					}
 				}
 			}
-			log.debug("Finished Registering AirTunes Services");
 			
 			while (!Thread.interrupted()) {
 				try {
@@ -161,18 +157,18 @@ public class AirPlayThread extends Thread {
 				try {
 					be.stop();
 				} catch (Exception e) {
-					log.error("Error Stopping BonjourService", e);
+					log.error("Error stopping Bonjour service", e);
 				}
 			}
 
-			log.info("Bonjur Service stopped.");
+			log.info("AirPlay service stopped");
 		} catch (Exception e) {
 			log.error(e);
 		}
 	}
 
 	private synchronized void closeRTSPServer() {
-		log.debug("Close RTSP Server");
+		log.debug("Closing RTSP server");
 		
 		try
 		{
@@ -180,7 +176,7 @@ public class AirPlayThread extends Thread {
 		}
 		catch(Exception e)
 		{
-			log.error("Error Closing WorkerThread");
+			log.error("Error closing Worker Thread");
 		}
 		try
 		{
@@ -188,7 +184,7 @@ public class AirPlayThread extends Thread {
 		}
 		catch(Exception e)
 		{
-			log.error("Error Closing BossThread");
+			log.error("Error closing Boss Thread");
 		}
 		
 		try
@@ -197,7 +193,7 @@ public class AirPlayThread extends Thread {
 		}
 		catch(Exception e)
 		{
-			log.error("Error Closing Worker Future");
+			log.error("Error closing Worker Future");
 		}
 		
 		try
@@ -206,7 +202,7 @@ public class AirPlayThread extends Thread {
 		}
 		catch(Exception e)
 		{
-			log.error("Error Closing Boss Future");
+			log.error("Error closing Boss Future");
 		}
 	}
 
@@ -214,7 +210,7 @@ public class AirPlayThread extends Thread {
 	 * Stop Our Thread
 	 */
 	public synchronized void stopThread() {
-		log.debug("AirplayThread Shutdown...");
+		log.debug("Stopping AirPlay service thread");
 		closeBonjourServices();
 		closeRTSPServer();
 		//this.interrupt();
