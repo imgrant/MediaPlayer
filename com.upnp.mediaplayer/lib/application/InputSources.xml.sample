@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sources default_pin="7" standby_pin="16">
+	<Source>
+		<name>PlayList</name>
+		<type>Playlist</type>
+		<GPIO_PIN>9</GPIO_PIN>
+	</Source>
+	<Source>
+	    <name>Default</name>
+	    <type>UpnpAv</type>
+	    <visible>false</visible>
+	</Source>
+	<Source>
+		<name>Radio</name>
+		<type>Radio</type>
+		<GPIO_PIN>9</GPIO_PIN>
+	</Source>
+
+
+	<Source>
+		<name>Laptop</name>
+		<type>Analog</type>
+		<GPIO_PIN>5</GPIO_PIN>
+	</Source>
+
+	<Source>
+		<name>Home PC</name>
+		<type>Analog</type>
+		<GPIO_PIN>7</GPIO_PIN>
+	</Source>
+
+	<Source>
+		<name>iPod</name>
+		<type>Analog</type>
+		<GPIO_PIN>7</GPIO_PIN>
+	</Source>
+
+	<Source>
+		<name>DAB Radio</name>
+		<type>Analog</type>
+		<GPIO_PIN>8</GPIO_PIN>
+	</Source>
+	
+	<Source>
+		<name>Spotify</name>
+		<type>Analog</type>
+		<GPIO_PIN>9</GPIO_PIN>
+		<START_SCRIPT>sudo service squeezelite start</START_SCRIPT>
+		<STOP_SCRIPT>sudo service squeezelite stop</STOP_SCRIPT>
+	</Source>
+	
+	<Source>
+	    <name>Receiver</name>
+	    <type>Receiver</type>
+	    <GPIO_PIN>9</GPIO_PIN>
+	</Source>
+	
+	<Source>
+	    <name>AirPlay</name>
+	    <type>NetAux</type>
+	    <visible>false</visible>
+	    <GPIO_PIN>9</GPIO_PIN>
+	</Source>
+
+</Sources>

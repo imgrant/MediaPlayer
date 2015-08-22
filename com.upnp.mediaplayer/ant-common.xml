@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="common">
 
-    <property name="plugin_target_dir" value="${mp.home.dir}/plugins/${plugin.name}"/>
-
     <property name="target_dir" value="${mp.home.dir}/build"/>
     <property name="classes_dir" value="${target_dir}/classes"/>
     <property name="test_classes_dir" value="${target_dir}/test-classes"/>
 
     <property name="lib_dir" value="${mp.home.dir}/lib"/>
     <property name="src_dir" value="${mp.home.dir}/src"/>
+
+    <property name="plugins_dir" value="${target_dir}/plugins"/>
+    <property name="plugin_target_dir" value="${plugins_dir}/${plugin.name}"/>
 
     <property name="plugin.jar.name" value="${plugin.name}"/>
 

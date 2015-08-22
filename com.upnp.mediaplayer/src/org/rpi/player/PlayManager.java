@@ -16,6 +16,7 @@ import org.rpi.config.Config;
 import org.rpi.mpdplayer.MPDPlayerController;
 import org.rpi.mplayer.MPlayerController;
 import org.rpi.player.events.EventAirPlayerStop;
+import org.rpi.player.events.EventAirplayVolumeChanged;
 import org.rpi.player.events.EventBase;
 import org.rpi.player.events.EventFinishedCurrentTrack;
 import org.rpi.player.events.EventMuteChanged;
@@ -36,7 +37,6 @@ import org.rpi.player.events.EventTrackChanged;
 import org.rpi.player.events.EventUpdateTrackMetaText;
 import org.rpi.player.events.EventVolumeChanged;
 import org.rpi.player.observers.*;
-import org.rpi.player.observers.ObservableTime;
 
 public class PlayManager implements Observer {
 
@@ -55,6 +55,7 @@ public class PlayManager implements Observer {
 	// For Volume
 	private long volume = 100;
 	private long mplayer_volume = 100;
+	private long airplayVolume = 100;
 	private boolean bMute;
 	private boolean bExternalVolume = false;
 
@@ -62,13 +63,14 @@ public class PlayManager implements Observer {
 	private ObservableTime obsvTime = new ObservableTime();
 	private ObservableInfo obsvInfo = new ObservableInfo();
 	private ObservableVolume obsvVolume = new ObservableVolume();
+	private ObservableAirplayVolume obsvAirplayVolume = new ObservableAirplayVolume();
 	private ObservableRadio obsvRadio = new ObservableRadio();
 	private ObservablePlayList obsvPlayList = new ObservablePlayList();
 	private ObservableProduct obsvProduct = new ObservableProduct();
 	private ObservableAVTransport obsvAVTransport = new ObservableAVTransport();
 	private ObservableSongcast obsvSongcast = new ObservableSongcast();
 	private ObservableAirPlay obsvAirPlay = new ObservableAirPlay();
-	private String status = "";
+	private String status = "Stopped";
 
 	private static PlayManager instance = null;
 
@@ -432,6 +434,36 @@ public class PlayManager implements Observer {
 	public synchronized ChannelBase getCurrentTrack() {
 		return current_track;
 	}
+	
+	/**
+	 * getCurrentSource
+	 * @return
+	 */
+	public String getCurrentTrackAsString()
+	{
+		String res = "UNKNOWN";
+		if(current_track ==null)
+		{
+			return "NONE";
+		}
+		if(current_track instanceof ChannelPlayList)
+		{
+			return "PLAYLIST";
+		}
+		else if (current_track instanceof ChannelAirPlay)
+		{
+			return "AIRPLAY";
+		}
+		else if (current_track instanceof ChannelRadio)
+		{
+			return "RADIO";
+		}
+		else if (current_track instanceof ChannelSongcast)
+		{
+			return "SONGCAST";
+		}
+		return res;
+	}
 
 	/**
 	 * 
@@ -690,6 +722,14 @@ public class PlayManager implements Observer {
 			
 		}
 	}
+	
+	public synchronized void setAirplayVolume(long volume)
+	{
+		airplayVolume = volume;
+		EventAirplayVolumeChanged ev = new EventAirplayVolumeChanged();
+		ev.setVolume(volume);
+		obsvAirplayVolume.notifyChange(ev);
+	}
 
 	/**
 	 * Set Mute
@@ -881,6 +921,15 @@ public class PlayManager implements Observer {
 			evr.setStatus(status);
 			obsvPlayList.notifyChange(evr);
 		}
+	}
+	
+	/**
+	 * getPlayerStatus
+	 * @return
+	 */
+	public String getPlayerStatus()
+	{
+		return status;
 	}
 
 	/***
@@ -1086,6 +1135,11 @@ public class PlayManager implements Observer {
 	public synchronized void observeVolumeEvents(Observer o) {
 		obsvVolume.addObserver(o);
 	}
+	
+	public synchronized void observeAirplayVolumeEvents(Observer o)
+	{
+		obsvAirplayVolume.addObserver(o);
+	}
 
 	/**
 	 * Register for PlayList Events
@@ -1178,6 +1232,13 @@ public class PlayManager implements Observer {
 
 	public void pause() {
 		pause(!bPaused);
+	}
+
+	/**
+	 * @return the airplayVolume
+	 */
+	public long getAirplayVolume() {
+		return airplayVolume;
 	}
 	
 

@@ -35,12 +35,13 @@
     </path>
 
 <!-- compile -->
-    <property name="release_root_dir" value="${target_dir}/beta"/>
+    <property name="release_root_dir" value="${target_dir}"/>
     <property name="release_dir" value="${release_root_dir}/mediaplayer"/>
 
     <property name="release_lib_dir_name" value="mediaplayer_lib"/>
     <property name="release_lib_dir" value="${release_dir}/${release_lib_dir_name}"/>
     <property name="release_native_lib_dir" value="${release_lib_dir}/ohNet"/>
+    <property name="release_plugin_lib_dir" value="${release_lib_dir}/plugins"/>
 
     <property name="download_dir" value="${basedir}/download"/>
     <property name="beta_download_dir" value="${download_dir}/beta"/>
@@ -72,7 +73,7 @@
     </target>
 
     <target name="compile" depends="init" description="compiles all sources using the correct classpath">
-        <javac srcdir="src" classpathref="classpath" destdir="${classes_dir}" debug="on"/>
+        <javac srcdir="src" classpathref="classpath" destdir="${classes_dir}" debug="on" includeantruntime="false"/>
         <copy todir="${release_lib_dir}">
             <path refid="classpath_core"/>
         </copy>
@@ -84,7 +85,7 @@
 
         <echo>Classpath is ${classpathProp}</echo>
 
-        <javac srcdir="tests" classpathref="test_classpath" destdir="${test_classes_dir}" debug="on"/>
+        <javac srcdir="tests" classpathref="test_classpath" destdir="${test_classes_dir}" debug="on" includeantruntime="false"/>
     </target>
 
     <target name="tests" depends="tests_compile" description="runs all testcases">
@@ -105,9 +106,6 @@
     </target>
 
     <target name="build_jar" depends="clean, compile" description="builds a jar file (mediaplayer.jar)">
-        <copy todir="${release_lib_dir}">
-            <path refid="classpath_core"/>
-        </copy>
         
         <copy todir="${classes_dir}/org/rpi/image">
 			<fileset dir="${basedir}/src/org/rpi/image"/>
@@ -130,10 +128,21 @@
         </jar>
     </target>
 
-    <target name="build_app" depends="build_jar" description="assembles the application in the release directory">
-        <!-- copy needed native libs to release -->
+    <target name="build_app" depends="build_jar, build_plugins" description="assembles the application in the release directory">
+    <!-- copy core Java libs - already done by compile
+        <copy todir="${release_lib_dir}">
+            <path refid="classpath_core"/>
+        </copy>
+    -->
+
+        <!-- copy native ohNet libs to release -->
         <copy todir="${release_native_lib_dir}">
             <path refid="native_libs"/>
+        </copy>
+
+        <!-- copy Java libs for plugins -->
+        <copy todir="${release_plugin_lib_dir}">
+            <path refid="classpath_plugins"/>
         </copy>
 
         <!-- copy additional files to application -->
@@ -148,21 +157,24 @@
             <fileset dir="${lib_dir}/application"/>
         </copy>
 
-        <zip destfile="${target_dir}/mediaplayer.zip" basedir="${release_root_dir}"/>
+        <copy todir="${release_dir}/plugins.rename_to_enable">
+            <fileset dir="${plugins_dir}"/>
+        </copy>
+
+        <zip destfile="${target_dir}/mediaplayer.zip" basedir="${release_dir}">
+        </zip>
     </target>
 
     <target name="publish_zip_beta" depends="build_app" description="copy the zip of build_app and put it into the download beta directory">
         <delete dir="${beta_download_dir}"/>
         <mkdir dir="${beta_download_dir}"/>
         <copy file="${target_dir}/mediaplayer.zip" todir="${beta_download_dir}"/>
-        <copy file="${release_dir}/mediaplayer.jar" todir="${beta_download_dir}"/>
     </target>
 
     <target name="publish_zip_release" depends="build_app" description="copy the zip of build_app and put it into the download release directory">
         <delete dir="${release_download_dir}"/>
         <mkdir dir="${release_download_dir}"/>
         <copy file="${target_dir}/mediaplayer.zip" todir="${release_download_dir}"/>
-        <copy file="${release_dir}/mediaplayer.jar" todir="${release_download_dir}"/>
     </target>
 
     <target name="run" depends="build_app" description="runs the app from the current directory">
