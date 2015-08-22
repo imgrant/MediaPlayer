@@ -295,7 +295,6 @@ public class PrvRadio extends DvProviderAvOpenhomeOrgRadio1 implements Observer,
 			String sByte = myBytes.substring(index, index + 8);
 			Integer x = Integer.parseInt(sByte, 2);
 			Byte sens = (byte) x.intValue();
-			// byte b = Byte.parseByte(sByte, 2);
 			bytes[i] = sens;
 		}
 		return bytes;
